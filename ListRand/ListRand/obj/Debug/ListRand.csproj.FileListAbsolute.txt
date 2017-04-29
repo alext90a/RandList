@@ -1,0 +1,6 @@
+D:\TestProjects\ListRand\ListRand\bin\Debug\ListRand.exe.config
+D:\TestProjects\ListRand\ListRand\bin\Debug\ListRand.exe
+D:\TestProjects\ListRand\ListRand\bin\Debug\ListRand.pdb
+D:\TestProjects\ListRand\ListRand\obj\Debug\ListRand.csprojResolveAssemblyReference.cache
+D:\TestProjects\ListRand\ListRand\obj\Debug\ListRand.exe
+D:\TestProjects\ListRand\ListRand\obj\Debug\ListRand.pdb
