@@ -4,3 +4,9 @@ D:\TestProjects\ListRand\ListRand\bin\Debug\ListRand.pdb
 D:\TestProjects\ListRand\ListRand\obj\Debug\ListRand.csprojResolveAssemblyReference.cache
 D:\TestProjects\ListRand\ListRand\obj\Debug\ListRand.exe
 D:\TestProjects\ListRand\ListRand\obj\Debug\ListRand.pdb
+E:\Projects\RandList\ListRand\ListRand\bin\Debug\ListRand.exe.config
+E:\Projects\RandList\ListRand\ListRand\obj\Debug\ListRand.exe
+E:\Projects\RandList\ListRand\ListRand\obj\Debug\ListRand.pdb
+E:\Projects\RandList\ListRand\ListRand\bin\Debug\ListRand.exe
+E:\Projects\RandList\ListRand\ListRand\bin\Debug\ListRand.pdb
+E:\Projects\RandList\ListRand\ListRand\obj\Debug\ListRand.csprojResolveAssemblyReference.cache

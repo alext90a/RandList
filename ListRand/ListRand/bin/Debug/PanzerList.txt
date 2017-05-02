@@ -1,3 +1,5 @@
+Count: 4
+Tail: -1
 Node	t-18	-1	1	2
 Node	t-72	3	-1	-1
 Node	t-23	0	-1	3
