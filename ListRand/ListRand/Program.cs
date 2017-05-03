@@ -45,7 +45,7 @@ namespace ListRand
             Dictionary<ListNode, NodeInfo> nodeIndexes = new Dictionary<ListNode, NodeInfo>();
 
             //traverse all nodes
-            BreadthTraverse(Head, saveData, ref nodeIndexes);
+            BreadthTraverse(Head, saveData, nodeIndexes);
             string nodeTail = "-1";
             if(Tail != null)
             {
@@ -55,7 +55,7 @@ namespace ListRand
                 }
                 else
                 {
-                    BreadthTraverse(Tail, saveData, ref nodeIndexes);
+                    BreadthTraverse(Tail, saveData, nodeIndexes);
                     nodeTail = nodeIndexes[Tail].mIndex.ToString();
                 }
             }
@@ -70,7 +70,7 @@ namespace ListRand
 
         }
 
-        void BreadthTraverse(ListNode startNode, List<string> saveData, ref Dictionary<ListNode, NodeInfo> nodeIndexes)
+        void BreadthTraverse(ListNode startNode, List<string> saveData, Dictionary<ListNode, NodeInfo> nodeIndexes)
         {
             LinkedList<ListNode> queue = new LinkedList<ListNode>();
             queue.AddLast(startNode);
