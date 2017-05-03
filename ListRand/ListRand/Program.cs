@@ -101,7 +101,7 @@ namespace ListRand
 
         void addNodeToCheckList(ListNode curNode, LinkedList<ListNode> queue, Dictionary<ListNode, NodeInfo> nodeIndexes)
         {
-            if (curNode != null && !nodeIndexes.ContainsKey(curNode))
+            if (curNode != null)
             {
                 queue.AddLast(curNode);
                 if (!nodeIndexes.ContainsKey(curNode))
@@ -109,6 +109,43 @@ namespace ListRand
                     nodeIndexes.Add(curNode, new NodeInfo(nodeIndexes.Count));
                 }
             }
+        }
+
+        protected void addStringToFile(FileStream fs, string nodeInfo)
+        {
+            byte[] info = new UTF8Encoding(true).GetBytes(nodeInfo);
+            fs.Write(info, 0, info.Length);
+        }
+
+        protected string getSaveDataString(ListNode node, Dictionary<ListNode, NodeInfo> nodeIndexes)
+        {
+            int nextIndex = -1;
+            int randIndex = -1;
+            int prevIndex = -1;
+            if (node.Next != null && nodeIndexes.ContainsKey(node.Next))
+            {
+                nextIndex = nodeIndexes[node.Next].mIndex;
+            }
+            if (node.Rand != null && nodeIndexes.ContainsKey(node.Rand))
+            {
+                randIndex = nodeIndexes[node.Rand].mIndex;
+            }
+            if (node.Prev != null && nodeIndexes.ContainsKey(node.Prev))
+            {
+                prevIndex = nodeIndexes[node.Prev].mIndex;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Node\t");
+            sb.Append(node.Data);
+            sb.Append("\t");
+            sb.Append(prevIndex.ToString());
+            sb.Append("\t");
+            sb.Append(randIndex.ToString());
+            sb.Append("\t");
+            sb.Append(nextIndex.ToString());
+            sb.Append("\n");
+            return sb.ToString();
         }
 
         public void Deserialize(FileStream fs)
@@ -163,43 +200,6 @@ namespace ListRand
                 Console.WriteLine("Error element count is not valid");
             }
             
-        }
-
-        protected void addStringToFile(FileStream fs, string nodeInfo)
-        {
-            byte[] info = new UTF8Encoding(true).GetBytes(nodeInfo);
-            fs.Write(info, 0, info.Length);
-        }
-
-        protected string getSaveDataString(ListNode node, Dictionary<ListNode, NodeInfo> nodeIndexes)
-        {
-            int nextIndex = -1;
-            int randIndex = -1;
-            int prevIndex = -1;
-            if (node.Next != null && nodeIndexes.ContainsKey(node.Next))
-            {
-                nextIndex = nodeIndexes[node.Next].mIndex;
-            }
-            if (node.Rand != null && nodeIndexes.ContainsKey(node.Rand))
-            {
-                randIndex = nodeIndexes[node.Rand].mIndex;
-            }
-            if (node.Prev != null && nodeIndexes.ContainsKey(node.Prev))
-            {
-                prevIndex = nodeIndexes[node.Prev].mIndex;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.Append("Node\t");
-            sb.Append(node.Data);
-            sb.Append("\t");
-            sb.Append(prevIndex.ToString());
-            sb.Append("\t");
-            sb.Append(randIndex.ToString());
-            sb.Append("\t");
-            sb.Append(nextIndex.ToString());
-            sb.Append("\n");
-            return sb.ToString();
         }
 
         protected void fillNodeFromString(string infoString, ListNode node, List<ListNode> nodeStore)
