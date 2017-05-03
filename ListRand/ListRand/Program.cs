@@ -21,16 +21,21 @@ namespace ListRand
         public ListNode Tail;
         public int Count;
 
-        Dictionary<ListNode, int> mNodeIndexes = new Dictionary<ListNode, int>();
+        
 
         public void Serialize(FileStream fs)
         {
-            mNodeIndexes.Clear();
+            if(Head == null)
+            {
+                Console.WriteLine("Error: List Rand head is null");
+                return;
+            }
             HashSet<ListNode> visited = new HashSet<ListNode>();
             List<string> saveData = new List<string>();
+            Dictionary<ListNode, int> mNodeIndexes = new Dictionary<ListNode, int>();
 
 
-            BreadthTraverse(Head, visited, saveData);
+            BreadthTraverse(Head, visited, saveData, mNodeIndexes);
             string nodeTail = "-1";
             if(Tail != null)
             {
@@ -40,95 +45,96 @@ namespace ListRand
                 }
                 else
                 {
-                    BreadthTraverse(Tail, visited, saveData);
+                    BreadthTraverse(Tail, visited, saveData, mNodeIndexes);
                     nodeTail = mNodeIndexes[Tail].ToString();
                 }
             }
             
 
-            AddNodeInfo(fs, "Count: " + mNodeIndexes.Count.ToString() + "\n");
-            AddNodeInfo(fs, "Tail: " + nodeTail + "\n");
+            addStringToFile(fs, Constants.kCountName + mNodeIndexes.Count.ToString() + "\n");
+            addStringToFile(fs, Constants.kTailName + nodeTail + "\n");
             for (int i = 0; i < saveData.Count; ++i)
             {
-                AddNodeInfo(fs, saveData[i]);
+                addStringToFile(fs, saveData[i]);
             }
 
         }
 
-        void BreadthTraverse(ListNode startNode, HashSet<ListNode> visited, List<string> saveData)
+        void BreadthTraverse(ListNode startNode, HashSet<ListNode> visited, List<string> saveData, Dictionary<ListNode, int> mNodeIndexes)
         {
-            LinkedList<ListNode> store = new LinkedList<ListNode>();
-            store.AddLast(Head);
-            mNodeIndexes.Add(Head, mNodeIndexes.Count);
-            while (store.Count != 0)
+            LinkedList<ListNode> queue = new LinkedList<ListNode>();
+            queue.AddLast(startNode);
+            if(!mNodeIndexes.ContainsKey(startNode))
             {
-                ListNode curNode = store.First.Value;
-                ListNode curPrev = curNode.Prev;
-                ListNode curRand = curNode.Rand;
-                ListNode curNext = curNode.Next;
-                store.RemoveFirst();
+                mNodeIndexes.Add(startNode, mNodeIndexes.Count);
+            }
+            
+            while (queue.Count != 0)
+            {
+                ListNode curNode = queue.First.Value;
+                queue.RemoveFirst();
                 if (visited.Contains(curNode))
                 {
                     continue;
                 }
 
-                if (curPrev != null && !visited.Contains(curPrev))
-                {
-                    store.AddLast(curPrev);
-                    if (!mNodeIndexes.ContainsKey(curPrev))
-                    {
-                        mNodeIndexes.Add(curPrev, mNodeIndexes.Count);
-                    }
-                }
-                if (curRand != null && !visited.Contains(curRand))
-                {
-                    store.AddLast(curRand);
-                    if (!mNodeIndexes.ContainsKey(curRand))
-                    {
-                        mNodeIndexes.Add(curRand, mNodeIndexes.Count);
-                    }
-                }
-                if (curNext != null && !visited.Contains(curNext))
-                {
-                    store.AddLast(curNext);
-                    if (!mNodeIndexes.ContainsKey(curNext))
-                    {
-                        mNodeIndexes.Add(curNext, mNodeIndexes.Count);
-                    }
-
-                }
-                saveData.Add(getSaveData(curNode));
+                addNodeToCheckList(curNode.Prev, visited, queue, mNodeIndexes);
+                addNodeToCheckList(curNode.Rand, visited, queue, mNodeIndexes);
+                addNodeToCheckList(curNode.Next, visited, queue, mNodeIndexes);
+                
+                saveData.Add(getSaveDataString(curNode, mNodeIndexes));
                 visited.Add(curNode);
+            }
+        }
+
+        void addNodeToCheckList(ListNode curNode, HashSet<ListNode> visited, LinkedList<ListNode> queue, Dictionary<ListNode, int> mNodeIndexes)
+        {
+            if (curNode != null && !visited.Contains(curNode))
+            {
+                queue.AddLast(curNode);
+                if (!mNodeIndexes.ContainsKey(curNode))
+                {
+                    mNodeIndexes.Add(curNode, mNodeIndexes.Count);
+                }
             }
         }
 
         public void Deserialize(FileStream fs)
         {
-            mNodeIndexes.Clear();
             var streamReader = new StreamReader(fs, Encoding.UTF8, true);
             List<ListNode> nodes = new List<ListNode>();
             List<string> stringData = new List<string>();
-            String line;
-            line = streamReader.ReadLine();
-            Count = Convert.ToInt32(line.Substring(7, line.Length - 7));
-            line = streamReader.ReadLine();
-            int tailInd = Convert.ToInt32(line.Substring(6, line.Length - 6));
+            String curLine;
+            curLine = streamReader.ReadLine();
+            if(curLine == null)
+            {
+                Console.WriteLine("Error invalid file!");
+                return;
+            }
+            Count = Convert.ToInt32(curLine.Substring(Constants.kCountName.Length, curLine.Length - Constants.kCountName.Length));
+            curLine = streamReader.ReadLine();
+            if(curLine == null)
+            {
+                Console.WriteLine("Error invalid file");
+                return;
+            }
+            int tailInd = Convert.ToInt32(curLine.Substring(Constants.kTailName.Length, curLine.Length - Constants.kTailName.Length));
             do
             {
-                line = streamReader.ReadLine();
-                if (line == null)
+                curLine = streamReader.ReadLine();
+                if (curLine == null)
                 {
                     continue;
                 }
                 nodes.Add(new ListNode());
-                stringData.Add(line);
+                stringData.Add(curLine);
 
             }
-            while (line != null);
+            while (curLine != null);
 
             for (int j = 0; j < stringData.Count; ++j)
             {
-                fromString(stringData[j], nodes[j], nodes);
+                fillNodeFromString(stringData[j], nodes[j], nodes);
             }
 
             Head = nodes[0];
@@ -140,16 +146,20 @@ namespace ListRand
             {
                 Tail = nodes[tailInd];
             }
-            int end = 10;
+            if(Count != stringData.Count)
+            {
+                Console.WriteLine("Error element count is not valid");
+            }
+            
         }
 
-        protected void AddNodeInfo(FileStream fs, string nodeInfo)
+        protected void addStringToFile(FileStream fs, string nodeInfo)
         {
             byte[] info = new UTF8Encoding(true).GetBytes(nodeInfo);
             fs.Write(info, 0, info.Length);
         }
 
-        protected string getSaveData(ListNode node)
+        protected string getSaveDataString(ListNode node, Dictionary<ListNode, int> mNodeIndexes)
         {
             int nextIndex = -1;
             int randIndex = -1;
@@ -180,26 +190,26 @@ namespace ListRand
             return sb.ToString();
         }
 
-        protected void fromString(string info, ListNode node, List<ListNode> nodeStore)
+        protected void fillNodeFromString(string infoString, ListNode node, List<ListNode> nodeStore)
         {
 
             int startIndex = 0;
             int endIndex = 0;
-            startIndex = info.IndexOf("\t", startIndex);
-            endIndex = info.IndexOf("\t", startIndex + 1);
-            node.Data = info.Substring(startIndex + 1, endIndex - startIndex - 1);
+            startIndex = infoString.IndexOf("\t", startIndex);
+            endIndex = infoString.IndexOf("\t", startIndex + 1);
+            node.Data = infoString.Substring(startIndex + 1, endIndex - startIndex - 1);
 
             startIndex = endIndex;
-            endIndex = info.IndexOf("\t", startIndex + 1);
-            int prevId = Convert.ToInt32(info.Substring(startIndex + 1, endIndex - startIndex - 1));
+            endIndex = infoString.IndexOf("\t", startIndex + 1);
+            int prevId = Convert.ToInt32(infoString.Substring(startIndex + 1, endIndex - startIndex - 1));
 
             startIndex = endIndex;
-            endIndex = info.IndexOf("\t", startIndex + 1);
-            int randId = Convert.ToInt32(info.Substring(startIndex + 1, endIndex - startIndex - 1));
+            endIndex = infoString.IndexOf("\t", startIndex + 1);
+            int randId = Convert.ToInt32(infoString.Substring(startIndex + 1, endIndex - startIndex - 1));
 
             startIndex = endIndex;
-            endIndex = info.Count() - 1;
-            int nextId = Convert.ToInt32(info.Substring(startIndex + 1, endIndex - startIndex));
+            endIndex = infoString.Count() - 1;
+            int nextId = Convert.ToInt32(infoString.Substring(startIndex + 1, endIndex - startIndex));
 
 
             if (prevId != -1)
@@ -229,6 +239,7 @@ namespace ListRand
             ListNode nodet23 = new ListNode();
             ListNode nodet34 = new ListNode();
             ListNode nodet72 = new ListNode();
+            ListNode nodet54 = new ListNode();
 
             nodet18.Data = "t-18";
             nodet18.Next = nodet23;
@@ -246,13 +257,19 @@ namespace ListRand
 
             nodet72.Data = "t-72";
             nodet72.Prev = nodet34;
-            nodet34.Next = null;
-            nodet34.Rand = nodet18;
+            nodet72.Next = null;
+            nodet72.Rand = nodet18;
+
+            nodet54.Data = "t-54";
+            nodet54.Prev = nodet34;
+            nodet54.Rand = nodet23;
+            nodet54.Next = null;
 
             ListRand panzerList = new ListRand();
+            
             panzerList.Head = nodet18;
-            //panzerList.Tail = nodet72;
-            panzerList.Count = 4;
+            panzerList.Tail = nodet54;
+            
 
             FileStream fs = File.Create("PanzerList.txt");
             panzerList.Serialize(fs);
@@ -266,7 +283,6 @@ namespace ListRand
             fs = File.Create("PanzerList2.txt");
             panzerList2.Serialize(fs);
             fs.Close();
-            int i = 0;
         }
     }
 }
